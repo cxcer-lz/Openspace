@@ -1,8 +1,6 @@
 pragma solidity ^0.8.24;
 
 contract Bank{
-    receive() external payable { 
-    }
     mapping (address=>uint256) public balances;
     address admin;
     address[3] public topdespoit;
