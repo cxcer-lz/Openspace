@@ -22,7 +22,6 @@ interface IERC20 {
 
 contract TokenBank{
     address admin;
-    uint MAX_UINT=2**256 - 1;
     IERC20 public token;
     event Deposit(address indexed user, uint256 amount);
     event Withdraw(address indexed owner, uint256 amount);
