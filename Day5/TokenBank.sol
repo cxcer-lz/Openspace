@@ -29,8 +29,8 @@ contract TokenBank {
     event Deposit(address indexed user, uint256 amount);
     event Withdraw(address indexed user, uint256 amount);
 
-    constructor(BaseERC20 _token) {
-        token = _token;
+    constructor(address _token) {
+        token =IERC20( _token);
     }
 
     function deposit(uint256 _amount) public {
