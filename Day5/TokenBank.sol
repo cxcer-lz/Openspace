@@ -41,10 +41,9 @@ contract TokenBank{
     receive() external payable {
     }
 
-    //确保在存入代币前，先调用代币合约的 approve 方法，允许智能合约花费指定数量的代币
     function deposit(uint256 amount) public {
         require(amount>0,"amount exceeds balance!");
-        token.transferFrom(msg.sender, address(this), amount);
+        token.transfer(address(this), amount);
     }
 
 
