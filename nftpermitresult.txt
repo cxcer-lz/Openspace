@@ -1,0 +1,56 @@
+[⠊] Compiling...
+No files changed, compilation skipped
+
+Ran 1 test for test/nftmarketpermit.t.sol:NftMarketTest
+[PASS] testPermitBuy() (gas: 108085)
+Traces:
+  [110068] NftMarketTest::testPermitBuy()
+    ├─ [0] VM::sign("<pk>", 0x0f1960ad934c328548e892d5a593657c8ea07844e50bbd3e5a0d3a0ef8d54228) [staticcall]
+    │   └─ ← [Return] 28, 0x15f79f4c96745dcb1dfd2b7bfb414b6fa2c6ebf652289b671d04429ad0e8f1ee, 0x0c7090820e9b4ede144b4ba10b16b4b177a53673a0050582715774a7c0390d75
+    ├─ [0] VM::sign("<pk>", 0xc411b9be64129787640911bbdd11fece53bef5d48f62517262c4622f0e0d4b77) [staticcall]
+    │   └─ ← [Return] 28, 0xfe377cdf48f902d3cbcf681ad76bc16cca603c93871afc24dbc31cc26be3e61c, 0x79daf29cb3f3cdcddda3fc646631adba300d5e29984ea7642faf25ab301fb329
+    ├─ [2803] MockERC20::allowance(0x0376AAc07Ad725E01357B1725B5ceC61aE10473c, NftMarket: [0xCF75462c9e7fFf4eEB0c50185087a0fb9A056d2b]) [staticcall]
+    │   └─ ← [Return] 0
+    ├─ [0] VM::assertEq(0, 0) [staticcall]
+    │   └─ ← [Return]
+    ├─ [0] VM::startPrank(0x0376AAc07Ad725E01357B1725B5ceC61aE10473c)
+    │   └─ ← [Return]
+    ├─ [22423] MockERC20::approve(NftMarket: [0xCF75462c9e7fFf4eEB0c50185087a0fb9A056d2b], 100000000000000000000 [1e20])
+    │   ├─ emit Approval(owner: 0x0376AAc07Ad725E01357B1725B5ceC61aE10473c, spender: NftMarket: [0xCF75462c9e7fFf4eEB0c50185087a0fb9A056d2b], value: 100000000000000000000 [1e20])
+    │   └─ ← [Return] true
+    ├─ [74266] NftMarket::buyNFT(100000000000000000000 [1e20], 1)
+    │   ├─ [2477] MockERC721::ownerOf(1) [staticcall]
+    │   │   └─ ← [Return] 0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7
+    │   ├─ [2519] MockERC20::balanceOf(0x0376AAc07Ad725E01357B1725B5ceC61aE10473c) [staticcall]
+    │   │   └─ ← [Return] 1000000000000000000000 [1e21]
+    │   ├─ [477] MockERC721::ownerOf(1) [staticcall]
+    │   │   └─ ← [Return] 0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7
+    │   ├─ [11306] MockERC20::transferFrom(0x0376AAc07Ad725E01357B1725B5ceC61aE10473c, 0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7, 100000000000000000000 [1e20])
+    │   │   ├─ emit Transfer(from: 0x0376AAc07Ad725E01357B1725B5ceC61aE10473c, to: 0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7, value: 100000000000000000000 [1e20])
+    │   │   └─ ← [Return] true
+    │   ├─ [477] MockERC721::ownerOf(1) [staticcall]
+    │   │   └─ ← [Return] 0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7
+    │   ├─ [41268] MockERC721::transferFrom(0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7, 0x0376AAc07Ad725E01357B1725B5ceC61aE10473c, 1)
+    │   │   ├─ [477] MockERC721::ownerOf(1) [staticcall]
+    │   │   │   └─ ← [Return] 0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7
+    │   │   ├─ emit Approval(_owner: 0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7, _approved: 0x0000000000000000000000000000000000000000, _tokenId: 1)
+    │   │   ├─ emit Transfer(_from: 0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7, _to: 0x0376AAc07Ad725E01357B1725B5ceC61aE10473c, _tokenId: 1)
+    │   │   └─ ← [Stop]
+    │   ├─ [477] MockERC721::ownerOf(1) [staticcall]
+    │   │   └─ ← [Return] 0x0376AAc07Ad725E01357B1725B5ceC61aE10473c
+    │   └─ ← [Stop]
+    ├─ [0] VM::stopPrank()
+    │   └─ ← [Return]
+    ├─ [477] MockERC721::ownerOf(1) [staticcall]
+    │   └─ ← [Return] 0x0376AAc07Ad725E01357B1725B5ceC61aE10473c
+    ├─ [0] VM::assertEq(0x0376AAc07Ad725E01357B1725B5ceC61aE10473c, 0x0376AAc07Ad725E01357B1725B5ceC61aE10473c) [staticcall]
+    │   └─ ← [Return]
+    ├─ [519] MockERC20::balanceOf(0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7) [staticcall]
+    │   └─ ← [Return] 1100000000000000000000 [1.1e21]
+    ├─ [519] MockERC20::balanceOf(0x0376AAc07Ad725E01357B1725B5ceC61aE10473c) [staticcall]
+    │   └─ ← [Return] 900000000000000000000 [9e20]
+    ├─ [0] VM::assertEq(1100000000000000000000 [1.1e21], 1100000000000000000000 [1.1e21]) [staticcall]
+    │   └─ ← [Return]
+    └─ ← [Stop]
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 3.19ms (941.00µs CPU time)
