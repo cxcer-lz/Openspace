@@ -1,0 +1,44 @@
+[⠊] Compiling...
+No files changed, compilation skipped
+
+Ran 1 test for test/tokenBankpermit.t.sol:tokenBankTest
+[PASS] test_DepositWithLimitedPermit() (gas: 115949)
+Traces:
+  [115949] tokenBankTest::test_DepositWithLimitedPermit()
+    ├─ [2541] MockERC20::nonces(0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7) [staticcall]
+    │   └─ ← [Return] 0
+    ├─ [3307] SigUtils::getTypedDataHash(Permit({ owner: 0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7, spender: 0xF62849F9A0B5Bf2913b396098F7c7019b51A820a, value: 1000000000000000000 [1e18], nonce: 0, deadline: 86400 [8.64e4] })) [staticcall]
+    │   └─ ← [Return] 0x81ab993ecc03c92de46e17d830c71970ab9f918e670fccdcbaa96232b5217f98
+    ├─ [0] VM::sign("<pk>", 0x81ab993ecc03c92de46e17d830c71970ab9f918e670fccdcbaa96232b5217f98) [staticcall]
+    │   └─ ← [Return] 27, 0x16793928fe6dc22491094588f9ab14f263fabd5344ba1d9280b0fd6b7b4d509a, 0x4de9bd6d1c374d4caaeac42fd486124daaa5559ca68b7307f973d9e1b9243b6c
+    ├─ [105528] TokenBank::permitDeposit(0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7, TokenBank: [0xF62849F9A0B5Bf2913b396098F7c7019b51A820a], 1000000000000000000 [1e18], 86400 [8.64e4], 27, 0x16793928fe6dc22491094588f9ab14f263fabd5344ba1d9280b0fd6b7b4d509a, 0x4de9bd6d1c374d4caaeac42fd486124daaa5559ca68b7307f973d9e1b9243b6c)
+    │   ├─ [48938] MockERC20::permit(0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7, TokenBank: [0xF62849F9A0B5Bf2913b396098F7c7019b51A820a], 1000000000000000000 [1e18], 86400 [8.64e4], 27, 0x16793928fe6dc22491094588f9ab14f263fabd5344ba1d9280b0fd6b7b4d509a, 0x4de9bd6d1c374d4caaeac42fd486124daaa5559ca68b7307f973d9e1b9243b6c)
+    │   │   ├─ [3000] PRECOMPILES::ecrecover(0x81ab993ecc03c92de46e17d830c71970ab9f918e670fccdcbaa96232b5217f98, 27, 10165065668404152854767240793197725731440009941418411717329383694362089443482, 35241072078670099659377213102790823952079894131604727580989461796280911281004) [staticcall]
+    │   │   │   └─ ← [Return] 0x000000000000000000000000e05fcc23807536bee418f142d19fa0d21bb0cff7
+    │   │   ├─ emit Approval(owner: 0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7, spender: TokenBank: [0xF62849F9A0B5Bf2913b396098F7c7019b51A820a], value: 1000000000000000000 [1e18])
+    │   │   └─ ← [Stop]
+    │   ├─ [30406] MockERC20::transferFrom(0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7, TokenBank: [0xF62849F9A0B5Bf2913b396098F7c7019b51A820a], 1000000000000000000 [1e18])
+    │   │   ├─ emit Transfer(from: 0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7, to: TokenBank: [0xF62849F9A0B5Bf2913b396098F7c7019b51A820a], value: 1000000000000000000 [1e18])
+    │   │   └─ ← [Return] true
+    │   └─ ← [Stop]
+    ├─ [519] MockERC20::balanceOf(0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7) [staticcall]
+    │   └─ ← [Return] 0
+    ├─ [0] VM::assertEq(0, 0) [staticcall]
+    │   └─ ← [Return]
+    ├─ [519] MockERC20::balanceOf(TokenBank: [0xF62849F9A0B5Bf2913b396098F7c7019b51A820a]) [staticcall]
+    │   └─ ← [Return] 1000000000000000000 [1e18]
+    ├─ [0] VM::assertEq(1000000000000000000 [1e18], 1000000000000000000 [1e18]) [staticcall]
+    │   └─ ← [Return]
+    ├─ [803] MockERC20::allowance(0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7, TokenBank: [0xF62849F9A0B5Bf2913b396098F7c7019b51A820a]) [staticcall]
+    │   └─ ← [Return] 0
+    ├─ [0] VM::assertEq(0, 0) [staticcall]
+    │   └─ ← [Return]
+    ├─ [541] MockERC20::nonces(0xe05fcC23807536bEe418f142D19fa0d21BB0cfF7) [staticcall]
+    │   └─ ← [Return] 1
+    ├─ [0] VM::assertEq(1, 1) [staticcall]
+    │   └─ ← [Return]
+    └─ ← [Stop]
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 903.42µs (382.12µs CPU time)
+
+Ran 1 test suite in 5.62ms (903.42µs CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)
