@@ -1,122 +1,113 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-interface IERC20 {
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-   
-    function totalSupply() external view returns (uint256);
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-    function balanceOf(address account) external view returns (uint256);
 
-    function transfer(address to, uint256 value) external returns (bool);
+interface IERC20Permit {
+    function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external;
 
-    function allowance(address owner, address spender) external view returns (uint256);
-
-    function approve(address spender, uint256 value) external returns (bool);
-
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
-
-    function permit(address holder, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external;
-}
-interface IERC721 {
-    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
-    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
-    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
-    function balanceOf(address owner) external view returns (uint256 balance);
-    function ownerOf(uint256 tokenId) external view returns (address owner);
-    function safeTransferFrom(address from, address to, uint256 tokenId, bytes calldata data) external;
-    function safeTransferFrom(address from, address to, uint256 tokenId) external;
-    function transferFrom(address from, address to, uint256 tokenId) external;
-    function approve(address to, uint256 tokenId) external;
-    function setApprovalForAll(address operator, bool approved) external;
-    function getApproved(uint256 tokenId) external view returns (address operator);
-    function isApprovedForAll(address owner, address operator) external view returns (bool);
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
 }
 
-contract NftMarket{
-    IERC20 public token;
-    IERC721 public nfttoken;
-    mapping (uint=>mapping(address=>uint))lists;
-    address public owner;
-    mapping(address => bool) public whitelist;
-    mapping(bytes32 => bool) public usedSignatures;
+contract NftMarket is Ownable {
+    using ECDSA for bytes32;
 
-    event AddedToWhitelist(address indexed user);
-    
+    IERC20Permit public token; // EIP-2612 token 
+    IERC721 public nft; // ERC721 token 
 
-    constructor(address _token,address _nfttoken){
-        token=IERC20(_token);
-        nfttoken=IERC721(_nfttoken);
-        owner = msg.sender;
+    struct Listing {
+        address seller;
+        uint256 price;
+        bool active;
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not owner");
-        _;
+    mapping(uint256 => Listing) public listings;
+
+    bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address buyer,uint256 tokenId,uint256 price,uint256 deadline)");
+    bytes32 public DOMAIN_SEPARATOR;
+
+    constructor(IERC20Permit _token, IERC721 _nft) {
+        token = _token;
+        nft = _nft;
+
+        uint256 chainId;
+        assembly {
+            chainId := chainid()
+        }
+        DOMAIN_SEPARATOR = keccak256(
+            abi.encode(
+                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                keccak256(bytes("NftMarket")),
+                keccak256(bytes("1")),
+                chainId,
+                address(this)
+            )
+        );
     }
 
-    modifier onlyWhitelisted(address user) {
-        require(whitelist[user], "Not whitelisted");
-        _;
-    }
-
-    function addToWhitelist(address user) external onlyOwner {
-        whitelist[user] = true;
-        emit AddedToWhitelist(user);
-    }
-
-
-    function list(uint256 tokenId,uint256 price)public {
-        require(nfttoken.ownerOf(tokenId)==msg.sender,"You are not the owner of this NFT");
-        require(nfttoken.getApproved(tokenId) == address(this), "Marketplace is not approved");
-        lists[tokenId][msg.sender]=price;
-    }
-
-    function buyNFT(uint256 buyamount,uint256 tokenId) public{
-        require(buyamount==lists[tokenId][nfttoken.ownerOf(tokenId)],"the price mot match");
-        require(token.balanceOf(msg.sender)>=lists[tokenId][msg.sender],'Insufficient token balance');
-        token.transferFrom(msg.sender, nfttoken.ownerOf(tokenId), buyamount);
-        nfttoken.transferFrom(nfttoken.ownerOf(tokenId), msg.sender, tokenId);
-        delete lists[tokenId][nfttoken.ownerOf(tokenId)];
+    function listNFT(uint256 tokenId, uint256 price) external {
+        require(nft.ownerOf(tokenId) == msg.sender, "Not the owner");
+        nft.transferFrom(msg.sender, address(this), tokenId);
+        listings[tokenId] = Listing(msg.sender, price, true);
     }
 
     function permitBuy(
         uint256 tokenId,
-        uint256 value,
+        uint256 price,
         uint256 deadline,
-        uint8 permitV,
-        bytes32 permitR,
-        bytes32 permitS, 
-        uint8 v, 
-        bytes32 r, 
-        bytes32 s)public{
-        // Generate the message hash
-        bytes32 messageHash = keccak256(abi.encodePacked(msg.sender, tokenId));
-        
-        // Reconstruct the signed message hash
-        bytes32 ethSignedMessageHash = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash)
+        bytes calldata signatureForWL,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external {
+        require(block.timestamp <= deadline, "Permit expired");
+        require(listings[tokenId].active, "NFT not listed");
+        require(listings[tokenId].price == price, "Incorrect price");
+
+        bytes32 structHash = keccak256(
+            abi.encode(
+                PERMIT_TYPEHASH,
+                msg.sender, // Buyer's address
+                tokenId,
+                price,
+                deadline
+            )
         );
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                DOMAIN_SEPARATOR,
+                structHash
+            )
+        );
+        address signer = digest.recover(signatureForWL);
+        require(signer == owner(), "Invalid signature");
 
-        // Recover the signer address
-        address signer = ecrecover(ethSignedMessageHash, v, r, s);
+        Listing memory listing = listings[tokenId];
+        listings[tokenId].active = false;
+
+  
+        token.permit(msg.sender, address(this), price, deadline, v, r, s);
+
         
-        // Ensure the signer is the owner and the signature hasn't been used before
-        require(signer == owner, "Invalid signature");
-        require(!usedSignatures[ethSignedMessageHash], "Signature already used");
+        require(token.transferFrom(msg.sender, listing.seller, listing.price), "Token transfer failed");
 
-        // Mark this signature as used
-        usedSignatures[ethSignedMessageHash] = true;
-
-        // Ensure the buyer is whitelisted
-        require(whitelist[msg.sender], "Not whitelisted");
-
-        // Execute the buy process (add your buy logic here)
-        token.permit(msg.sender,address(this),value,deadline,permitV,permitR,permitS);
-        buyNFT(value,tokenId);
+        
+        nft.transferFrom(address(this), msg.sender, tokenId);
     }
-
-
 }
